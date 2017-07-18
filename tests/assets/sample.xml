@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf8" ?>
+<form  name="sample" action="test.php" novalidate="true">
+	<input type="text" name="password">
+		<validation required="true" minlength="4">
+			<errors>
+				<minlength>Too short. %s characters at least</minlength>
+			</errors>
+		</validation>
+	</input>
+	<input type="text" name="password-validate">
+		<validation required="true" minlength="4">
+			<connections equals="content:password" />
+			<errors>
+				<connections>
+					<equals>Passwords does not match</equals>
+				</connections>
+				<minlength>Too short. %s characters at least</minlength>
+			</errors>
+		</validation>
+	</input>
+	<input type="checkbox" name="gender[test]" value="t1">
+		<validation required="true" />
+	</input>
+	<collection name="gender">
+		<input type="checkbox" name="gender[]" value="g1" />
+		<input type="checkbox" name="gender[]" value="g2" />
+		<input type="checkbox" name="gender[]" value="g3" />
+		<validation required="true">
+			<modifiers required-min="3" required-max="3" />
+			<errors>
+				<required>You need to select 3 fields</required>
+			</errors>
+		</validation>
+	</collection>
+	<textarea name="description">
+		<validation required="true" maxlength="200">
+			<errors>
+				<required>Textarea required</required>
+			</errors>
+		</validation>
+	</textarea>
+	<defaults>
+		<validation>
+			<errors>
+				<required>This field is required</required>
+				<maxlength>Default maxlength error</maxlength>
+			</errors>
+		</validation>
+	</defaults>
+</form>
