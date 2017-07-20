@@ -26,6 +26,11 @@ class Validation
 	/**
 	 * @var array
 	 */
+	private $listeners = [];
+
+	/**
+	 * @var array
+	 */
 	private $models = [];
 
 	/**
@@ -39,6 +44,18 @@ class Validation
 	public function __construct(AbstractConfig $config) {
 		$this->validatorFactory = new ValidatorFactory();
 		$this->parseConfig($config);
+	}
+
+	/**
+	 * @param string $name
+	 * @param callable $callback
+	 */
+	public function addListener($name, $error, callable $callback) {
+		if ( ! array_key_exists($name, $this->listeners)) {
+			$this->listeners[$name] = [];
+		}
+
+		$this->listeners[$name][] = new Listeners\ValidationListener($name, $error, $callback);
 	}
 
 	/**
@@ -251,6 +268,16 @@ class Validation
 				else {
 					if ( ! $this->validateValue($model->validator, $value)) {
 						$result->addError($id, $model->config);
+					}
+				}
+			}
+		}
+
+		foreach ($this->listeners as $id => $fieldListeners) {
+			foreach ($fieldListeners as $listener) {
+				if (array_key_exists($id, $input)) {
+					if ( ! $listener->call($input[$id])) {
+						$result->addError($id, $listener->getError());
 					}
 				}
 			}

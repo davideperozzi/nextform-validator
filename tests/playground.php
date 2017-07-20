@@ -25,14 +25,22 @@ use Nextform\Renderer\Renderer;
 
 $config = new XmlConfig('
 	<form name="test" method="post" enctype="multipart/form-data">
+		<input name="username" type="text" placeholder="Username">
+			<validation minlength="5">
+				<errors>
+					<minlength>The Username too short</minlength>
+				</errors>
+			</validation>
+		</input>
+		<input name="password" type="password" placeholder="Password" />
 		<input name="test-file[]" type="file" multiple="true">
-			<validation required="true" maxsize="5000" filetype="jpg,jpeg">
+			<!--<validation required="true" maxsize="5000" filetype="jpg,jpeg">
 				<errors>
 					<required>Test file required</required>
 					<maxsize>The file is too big yo</maxsize>
 					<filetype>Only %s supported</filetype>
 				</errors>
-			</validation>
+			</validation>-->
 		</input>
 		<input name="submit-btn" type="submit" />
 	</form>
@@ -46,6 +54,14 @@ echo "<pre>";
 
 if (array_key_exists('submit-btn', $_POST)) {
 	$validator = new Validation($config);
+
+	$validator->addListener('username', 'The username is invalid', function($value){
+		return $value == 'Davide';
+	});
+
+	$validator->addListener('username', 'The username is too long', function($value){
+		return strlen('Davide') < 7;
+	});
 
 	$validator->addData($_POST);
 	$validator->addData($_FILES);
@@ -67,8 +83,11 @@ if (array_key_exists('submit-btn', $_POST)) {
 $renderer = new Renderer($config);
 $buffer = $renderer->render();
 
+$buffer->group(['username', 'password']);
 $buffer->each(function($chunk, $content){
-	$chunk->wrap('<div>' . $content . '</div>');
+	$chunk->wrap(
+		'<div class="input-wrapper" style="padding: 10px; border: 1px solid lightgray; margin-bottom: 10px">' . $content . '</div>'
+	);
 });
 
 $buffer->submitBtn->wrap('<hr>%s');
