@@ -10,7 +10,8 @@ class MinlengthValidator extends AbstractValidator implements ConnectValidation
 	public static $optionType = self::OPTION_TYPE_INTEGER;
 
 	/**
-	 *
+	 * @param string $value
+	 * @return boolean
 	 */
 	public function validate($value) {
 		if (is_string($value) || is_numeric($value)) {

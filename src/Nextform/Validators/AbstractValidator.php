@@ -3,6 +3,7 @@
 namespace Nextform\Validators;
 
 use Nextform\Fields\AbstractField;
+use Nextform\Helpers\ArrayHelper;
 
 abstract class AbstractValidator
 {
@@ -27,6 +28,13 @@ abstract class AbstractValidator
 	const OPTION_TYPE_BOOLEAN = 4;
 
 	/**
+	 * Comma seperated array
+	 *
+	 * @var string
+	 */
+	const OPTION_TYPE_CSA = 5;
+
+	/**
 	 * @var string
 	 */
 	public static $optionType = self::OPTION_TYPE_STRING;
@@ -42,6 +50,11 @@ abstract class AbstractValidator
 	public static $supportedTypes = [
 		'string', 'integer'
 	];
+
+	/**
+	 * @var boolean
+	 */
+	public static $validateUndefinedValues = false;
 
 	/**
 	 * @var mixed
@@ -86,9 +99,24 @@ abstract class AbstractValidator
 			case self::OPTION_TYPE_FLOAT:
 				$option = floatval($option);
 				break;
+
+			case self::OPTION_TYPE_CSA:
+				$option = explode(',', $option);
+
+				for ($i = 0, $len = count($option); $i < $len; $i++) {
+					$option[$i] = trim($option[$i]);
+				}
+				break;
 		}
 
 		$this->option = $option;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function validateUndefined() {
+		return static::$validateUndefinedValues;
 	}
 
 	/**
@@ -96,7 +124,36 @@ abstract class AbstractValidator
 	 * @return boolean
 	 */
 	public function supports($value) {
-		return in_array(gettype($value), static::$supportedTypes);
+		return is_null($value) || in_array($this->getExtendedType($value), static::$supportedTypes);
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return string
+	 */
+	private function getExtendedType($value) {
+		if (is_array($value)) {
+			$typeCount = [];
+
+			foreach ($value as $val) {
+				$class = get_class($val);
+
+				if (array_key_exists($class, $typeCount)) {
+					$typeCount[$class]++;
+				}
+				else {
+					$typeCount[$class] = 1;
+				}
+			}
+
+			if (count($typeCount) == 1) {
+				reset($typeCount);
+
+				return gettype($value) . '<' . key($typeCount) . '>';
+			}
+		}
+
+		return gettype($value);
 	}
 
 	/**
@@ -143,6 +200,19 @@ abstract class AbstractValidator
 		}
 
 		$this->modifiers[$name] = $value;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	protected function isArrayField() {
+		if ($this->field->hasAttribute('name')) {
+			return ArrayHelper::isSerializedArray(
+				$this->field->getAttribute('name')
+			);
+		}
+
+		return false;
 	}
 
 	/**

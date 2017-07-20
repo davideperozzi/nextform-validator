@@ -7,9 +7,17 @@ use Nextform\Validators\ConnectValidation;
 use Nextform\Fields\Validation\AbstractValidator;
 use Nextform\Fields\Validation\ConnectionModel;
 use Nextform\Helpers\ArrayHelper;
+use Nextform\Helpers\FileHelper;
 
 class Validation
 {
+	/**
+	 * MD5 hash of "{{__nextform_value_undefined__}}"
+	 *
+	 * @var string
+	 */
+	const VALUE_UNDEFINED = '129debbe81b69843f54ac33c1872b8af';
+
 	/**
 	 * @var ValidatorFactory
 	 */
@@ -21,11 +29,89 @@ class Validation
 	private $models = [];
 
 	/**
+	 * @var array
+	 */
+	private $tmpData = [];
+
+	/**
 	 * @param AbstractConfig $config
 	 */
 	public function __construct(AbstractConfig $config) {
 		$this->validatorFactory = new ValidatorFactory();
 		$this->parseConfig($config);
+	}
+
+	/**
+	 * @param array $data
+	 * @param integer $type
+	 */
+	public function addData($data) {
+		$data = $this->parseInput($data);
+
+		foreach ($data as $name => $value) {
+			$this->tmpData[$name] = $value;
+		}
+	}
+
+	/**
+	 * @param array $input
+	 * @return array
+	 */
+	private function parseInput($input) {
+		$parsedInput = [];
+
+		foreach ($input as $name => $value) {
+			if (FileHelper::isUploadedFile($value)) {
+				$files = $this->createFileModels($value);
+				if ( ! empty($files)) {
+					$parsedInput[$name] = $files;
+				}
+			}
+			else {
+				$parsedInput[$name] = $value;
+			}
+		}
+
+		return $parsedInput;
+	}
+
+	/**
+	 * @param array $config
+	 * @return array
+	 */
+	private function createFileModels($config) {
+		$models = [];
+
+		if (is_array($config['name'])) {
+			$count = count($config['name']);
+
+			for ($i = 0; $i < $count; $i++) {
+				if (empty($config['name'][$i])) {
+					continue;
+				}
+
+				$models[] = new Models\FileModel(
+					$config['name'][$i],
+					$config['type'][$i],
+					$config['tmp_name'][$i],
+					$config['error'][$i],
+					$config['size'][$i]
+				);
+			}
+		}
+		else {
+			if ( ! empty($config['name'])) {
+				$models[] = new Models\FileModel(
+					$config['name'],
+					$config['type'],
+					$config['tmp_name'],
+					$config['error'],
+					$config['size']
+				);
+			}
+		}
+
+		return $models;
 	}
 
 	/**
@@ -39,7 +125,9 @@ class Validation
 		}
 	}
 
-
+	/**
+	 * @param AbstractField &$field
+	 */
 	private function createModels(&$field) {
 		if ( ! array_key_exists($field->id, $this->models)) {
 			$this->models[$field->id] = [];
@@ -69,6 +157,14 @@ class Validation
 	 * @return boolean
 	 */
 	private function validateValue(&$validator, $value) {
+		if ($value == self::VALUE_UNDEFINED) {
+			if ($validator->validateUndefined()) {
+				return $validator->validate(null);
+			}
+
+			return true;
+		}
+
 		if ( ! $validator->supports($value)) {
 			throw new Exception\TypeNotSupportedException(
 				sprintf(
@@ -88,14 +184,15 @@ class Validation
 	 */
 	public function validate($input = []) {
 		$result = new Models\ResultModel();
+		$input = array_merge($this->tmpData, $this->parseInput($input));
 
 		foreach ($this->models as $id => $validators) {
 			if (preg_match('/^(.*)\[.*\]$/', $id, $matches)) {
 				$inputEntry = ArrayHelper::getSerializedArrayEntry($id);
-				$value = array_key_exists($inputEntry, $input) ? $input[$inputEntry] : '';
+				$value = array_key_exists($inputEntry, $input) ? $input[$inputEntry] : self::VALUE_UNDEFINED;
 			}
 			else {
-				$value = array_key_exists($id, $input) ? $input[$id] : '';
+				$value = array_key_exists($id, $input) ? $input[$id] : self::VALUE_UNDEFINED;
 			}
 
 			foreach ($this->models[$id] as $model) {

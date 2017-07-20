@@ -2,7 +2,7 @@
 
 namespace Nextform\Validators;
 
-class EqualsValidator extends AbstractValidator implements ConnectValidation
+class RegexValidator extends AbstractValidator implements ConnectValidation
 {
 	/**
 	 * @var string
@@ -14,6 +14,10 @@ class EqualsValidator extends AbstractValidator implements ConnectValidation
 	 * @return boolean
 	 */
 	public function validate($value) {
-		return $this->option === $value;
+		if ( ! empty($this->option)) {
+			return (bool)@preg_match($this->option, $value);
+		}
+
+		return false;
 	}
 }

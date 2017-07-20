@@ -2,6 +2,7 @@
 
 namespace Nextform\Validators;
 
+use Nextform\Validation\Models\FileModel;
 use Nextform\Fields\CollectionField;
 use Nextform\Helpers\ArrayHelper;
 
@@ -11,6 +12,11 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 	 * @var string
 	 */
 	public static $optionType = self::OPTION_TYPE_BOOLEAN;
+
+	/**
+	 * @var boolean
+	 */
+	public static $validateUndefinedValues = true;
 
 	/**
 	 * @var array
@@ -24,13 +30,15 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 	 * @var array
 	 */
 	public static $supportedTypes = [
+		'array<Nextform\Validation\Models\FileModel>',
+		'array',
 		'string',
-		'integer',
-		'array'
+		'integer'
 	];
 
 	/**
-	 *
+	 * @param string|array $value
+	 * @return boolean
 	 */
 	public function validate($value) {
 		if (true == $this->option) {
@@ -98,14 +106,18 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 						$reducedValues = ArrayHelper::serializeArrayKeys($value);
 						$fieldPath = $this->field->getAttribute('name');
 						$pathPrefix = ArrayHelper::getSerializedArrayEntry($fieldPath);
-
 						foreach ($reducedValues as $path => $values) {
 							if ($pathPrefix . $path == $fieldPath) {
 								if (is_array($values)) {
 									$validValues = [];
 
 									foreach ($values as $value) {
-										$validValues[] =  $this->isEmpty($value) ? 0 : 1;
+										if ($value instanceof FileModel) {
+											$validValues[] = $value->isValid() ? 1 : 0;
+										}
+										else {
+											$validValues[] =  $this->isEmpty($value) ? 0 : 1;
+										}
 									}
 
 									$valueResultsCount = array_count_values($validValues);
@@ -119,10 +131,29 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 						}
 					}
 					else {
-						// @todo: Validate other types (e.g. files)
-					}
+						if ( ! empty ($value)) {
+							$valueCount = count($value);
+							$validCount = 0;
 
-					return false;
+							foreach ($value as $val) {
+								if ($val instanceof FileModel) {
+									if ($val->isValid()) {
+										$validCount++;
+									}
+								}
+								else if (is_string($val) && ! $this->isEmpty($val)) {
+									$validCount++;
+								}
+								else if ( ! empty($val)) {
+									$validCount++;
+								}
+							}
+
+							return $validCount > 0;
+						}
+
+						return ! empty($value);
+					}
 				}
 				else if (is_string($value) || is_numeric($value)) {
 					return !$this->isEmpty($value);
@@ -133,21 +164,6 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 		}
 
 		return true;
-	}
-
-
-
-	/**
-	 * @return boolean
-	 */
-	private function isArrayField() {
-		if ($this->field->hasAttribute('name')) {
-			return ArrayHelper::isSerializedArray(
-				$this->field->getAttribute('name')
-			);
-		}
-
-		return false;
 	}
 
 	/**

@@ -30,7 +30,6 @@ class ResultModel implements \JsonSerializable
 		}
 
 		$this->errors[$id][] = $config;
-		$this->test = [];
 	}
 
 	/**

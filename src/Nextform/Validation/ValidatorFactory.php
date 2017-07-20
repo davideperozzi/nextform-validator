@@ -7,6 +7,14 @@ use Nextform\Validators\RequiredValidator;
 use Nextform\Validators\MaxlengthValidator;
 use Nextform\Validators\MinlengthValidator;
 use Nextform\Validators\EqualsValidator;
+use Nextform\Validators\EmailValidator;
+use Nextform\Validators\RegexValidator;
+use Nextform\Validators\MaxsizeValidator;
+use Nextform\Validators\MinsizeValidator;
+use Nextform\Validators\FiletypeValidator;
+use Nextform\Validators\DatecheckValidator;
+use Nextform\Validators\DateformatValidator;
+use Nextform\Validators\ZipcodeValidator;
 
 class ValidatorFactory
 {
@@ -14,10 +22,18 @@ class ValidatorFactory
 	 * @var array
 	 */
 	private $validators = [
-		'required' => RequiredValidator::class,
+		'dateformat' => DateformatValidator::class,
+		'datecheck' => DatecheckValidator::class,
 		'maxlength' => MaxlengthValidator::class,
 		'minlength' => MinlengthValidator::class,
-		'equals' => EqualsValidator::class
+		'filetype' => FiletypeValidator::class,
+		'required' => RequiredValidator::class,
+		'maxsize' => MaxsizeValidator::class,
+		'minsize' => MinsizeValidator::class,
+		'zipcode' => ZipcodeValidator::class,
+		'equals' => EqualsValidator::class,
+		'regex' => RegexValidator::class,
+		'email' => EmailValidator::class
 	];
 
 	/**
