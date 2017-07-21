@@ -44,10 +44,26 @@ class ValidationListener
     }
 
     /**
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     */
+    public function __call($method, $args) {
+        if (is_callable(array($this, $method))) {
+            return call_user_func_array($this->$method, $args);
+        }
+        else {
+            throw new \Exception(
+                sprintf('Method %s not found in %s', $method, get_class($this))
+            );
+        }
+    }
+
+    /**
      * @param mixed $value
      * @return boolean
      */
     public function call($value) {
-        return (bool) ($this->callback)($value);
+        return (bool) $this->callback($value);
     }
 }
