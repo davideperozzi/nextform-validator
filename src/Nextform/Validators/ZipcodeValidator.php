@@ -7,7 +7,7 @@ class ZipcodeValidator extends AbstractValidator implements ConnectValidation
 	/**
 	 * @var string
 	 */
-	public static $optionType = self::OPTION_TYPE_STRING;
+	public static $optionType = self::OPTION_TYPE_CSA;
 
 	/**
      * @var array
@@ -48,9 +48,13 @@ class ZipcodeValidator extends AbstractValidator implements ConnectValidation
 	 * @return boolean
 	 */
 	public function validate($value) {
-        if (true == array_key_exists($this->option, $this->patterns)) {
-            return (bool)@preg_match($this->patterns[$this->option], $value);
-        }
+		foreach ($this->option as $locale) {
+	        if (true == array_key_exists($locale, $this->patterns)) {
+	            if (@preg_match($this->patterns[$locale], $value)) {
+	            	return true;
+	            }
+	        }
+		}
 
         return false;
 	}

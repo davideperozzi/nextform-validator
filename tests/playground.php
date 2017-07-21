@@ -34,13 +34,13 @@ $config = new XmlConfig('
 		</input>
 		<input name="password" type="password" placeholder="Password" />
 		<input name="test-file[]" type="file" multiple="true">
-			<!--<validation required="true" maxsize="5000" filetype="jpg,jpeg">
+			<validation required="true" maxsize="5000" filetype="jpg,jpeg">
 				<errors>
 					<required>Test file required</required>
 					<maxsize>The file is too big yo</maxsize>
 					<filetype>Only %s supported</filetype>
 				</errors>
-			</validation>-->
+			</validation>
 		</input>
 		<input name="submit-btn" type="submit" />
 	</form>
