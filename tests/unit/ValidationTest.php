@@ -2,12 +2,12 @@
 
 namespace Nextform\Validation\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Nextform\Fields\InputField;
 use Nextform\Config\XmlConfig;
-use Nextform\Validation\Validation;
+use Nextform\Fields\InputField;
 use Nextform\Validation\Models\FileModel;
+use Nextform\Validation\Validation;
 use Nextform\Validation\ValidatorFactory;
+use PHPUnit\Framework\TestCase;
 
 class ValidationTest extends TestCase
 {
@@ -21,19 +21,17 @@ class ValidationTest extends TestCase
      */
     private $factory;
 
-    /**
-     *
-     */
-    public function setUp() {
+
+    public function setUp()
+    {
         $this->factory = new ValidatorFactory();
         $this->textField = new InputField();
         $this->textField->setAttribute('name', 'test');
     }
 
-    /**
-     *
-     */
-    public function testEmailValidator() {
+
+    public function testEmailValidator()
+    {
         $validator = $this->factory->create('email', $this->textField, 'true');
 
         $this->assertTrue($validator->validate('testmail@test.de'));
@@ -41,10 +39,9 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate(''));
     }
 
-    /**
-     *
-     */
-    public function testDatecheckValidator() {
+
+    public function testDatecheckValidator()
+    {
         $validator = $this->factory->create('datecheck', $this->textField, 'true');
 
         $this->assertTrue($validator->validate(date('d-m-Y')));
@@ -53,10 +50,9 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate(''));
     }
 
-    /**
-     *
-     */
-    public function testDateformatValidator() {
+
+    public function testDateformatValidator()
+    {
         $validator = $this->factory->create('dateformat', $this->textField, 'd.m.Y');
 
         $this->assertTrue($validator->validate(date('d.m.Y')));
@@ -66,10 +62,9 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate(''));
     }
 
-    /**
-     *
-     */
-    public function testMaxlengthValidator() {
+
+    public function testMaxlengthValidator()
+    {
         $validator = $this->factory->create('maxlength', $this->textField, '5');
 
         $this->assertTrue($validator->validate(str_repeat('1', 5)));
@@ -79,10 +74,9 @@ class ValidationTest extends TestCase
         $this->assertTrue($validator->validate(''));
     }
 
-    /**
-     *
-     */
-    public function testMinlengthValidator() {
+
+    public function testMinlengthValidator()
+    {
         $validator = $this->factory->create('minlength', $this->textField, '5');
 
         $this->assertFalse($validator->validate(str_repeat('1', 4)));
@@ -92,10 +86,9 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate(''));
     }
 
-    /**
-     *
-     */
-    public function testZipcodeValidator() {
+
+    public function testZipcodeValidator()
+    {
         $validatorDe = $this->factory->create('zipcode', $this->textField, 'de');
         $validatorUsDe = $this->factory->create('zipcode', $this->textField, 'us,de');
 
@@ -108,20 +101,18 @@ class ValidationTest extends TestCase
         $this->assertFalse($validatorUsDe->validate('1234'));
     }
 
-    /**
-     *
-     */
-    public function testRegexValidator() {
+
+    public function testRegexValidator()
+    {
         $validator = $this->factory->create('regex', $this->textField, '/^test$/');
 
         $this->assertTrue($validator->validate('test'));
         $this->assertFalse($validator->validate('test2'));
     }
 
-    /**
-     *
-     */
-    public function testRequiredValidator() {
+
+    public function testRequiredValidator()
+    {
         $validator = $this->factory->create('required', $this->textField, 'true');
 
         $this->assertFalse($validator->validate([]));
@@ -150,10 +141,9 @@ class ValidationTest extends TestCase
         ));
     }
 
-    /**
-     *
-     */
-    public function testMaxsizeValidator() {
+
+    public function testMaxsizeValidator()
+    {
         $validator = $this->factory->create('maxsize', $this->textField, '5000');
         $file1 = new FileModel('file1.jpg', 'image/jpg', '/private/path', 0, 0);
         $file2 = new FileModel('file2.jpg', 'image/jpg', '/private/path', 0, 0);
@@ -173,10 +163,9 @@ class ValidationTest extends TestCase
         $this->assertTrue($validator->validate([$file1, $file2]));
     }
 
-    /**
-     *
-     */
-    public function testMinsizeValidator() {
+
+    public function testMinsizeValidator()
+    {
         $validator = $this->factory->create('minsize', $this->textField, '6000');
         $file1 = new FileModel('file1.jpg', 'image/jpg', '/private/path', 0, 0);
         $file2 = new FileModel('file2.jpg', 'image/jpg', '/private/path', 0, 0);
@@ -196,10 +185,9 @@ class ValidationTest extends TestCase
         $this->assertTrue($validator->validate([$file1, $file2]));
     }
 
-    /**
-     *
-     */
-    public function testFiletypeValidator() {
+
+    public function testFiletypeValidator()
+    {
         $validator = $this->factory->create('filetype', $this->textField, 'jpg,jpeg');
         $file1 = new FileModel('file1.jpg', 'image/jpg', '/private/path', 0, 10000);
         $file2 = new FileModel('file2.jpeg', 'image/jpg', '/private/path', 0, 10000);
@@ -209,10 +197,9 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate([$file3]));
     }
 
-    /**
-     *
-     */
-    public function testConnectValidation() {
+
+    public function testConnectValidation()
+    {
         $config = new XmlConfig(
             '<form>
                 <input name="password" type="password">
@@ -249,10 +236,9 @@ class ValidationTest extends TestCase
         ])->isValid());
     }
 
-    /**
-     *
-     */
-    public function testListenerValidation() {
+
+    public function testListenerValidation()
+    {
         $config = new XmlConfig(
             '<form>
                 <input name="password" type="password" />
@@ -263,7 +249,7 @@ class ValidationTest extends TestCase
 
         $validation = new Validation($config);
 
-        $validation->addListener('password', 'Soemthing went wrong', function($value){
+        $validation->addListener('password', 'Soemthing went wrong', function ($value) {
             return $value == '12345678';
         });
 
@@ -272,7 +258,7 @@ class ValidationTest extends TestCase
             'password-validate' => '12345678'
         ])->isValid());
 
-        $validation->addListener('password', 'Soemthing went wrong', function($value){
+        $validation->addListener('password', 'Soemthing went wrong', function ($value) {
             return $value != '12345678';
         });
 

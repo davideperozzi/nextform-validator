@@ -4,10 +4,10 @@ namespace Nextform\Validators;
 
 class FiletypeValidator extends AbstractValidator implements ConnectValidation
 {
-	/**
-	 * @var string
-	 */
-	public static $optionType = self::OPTION_TYPE_CSA;
+    /**
+     * @var string
+     */
+    public static $optionType = self::OPTION_TYPE_CSA;
 
     /**
      * @var array
@@ -16,12 +16,13 @@ class FiletypeValidator extends AbstractValidator implements ConnectValidation
         'array<Nextform\Validation\Models\FileModel>'
     ];
 
-	/**
-	 * @param string $value
-	 * @return boolean
-	 */
-	public function validate($value) {
-		if (is_array($value) &&  ! empty($value)) {
+    /**
+     * @param string $value
+     * @return boolean
+     */
+    public function validate($value)
+    {
+        if (is_array($value) &&  ! empty($value)) {
             $validExtensions = 0;
 
             foreach ($value as $file) {
@@ -44,5 +45,5 @@ class FiletypeValidator extends AbstractValidator implements ConnectValidation
         }
 
         return false;
-	}
+    }
 }

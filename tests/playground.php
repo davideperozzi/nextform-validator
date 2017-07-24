@@ -2,9 +2,9 @@
 
 require realpath(__DIR__ . '/../vendor/autoload.php');
 
-use Nextform\Validation\Validation;
 use Nextform\Config\XmlConfig;
 use Nextform\Renderer\Renderer;
+use Nextform\Validation\Validation;
 
 // $config = new XmlConfig(realpath(__DIR__ . '/assets/sample.xml'));
 // $validator = new Validation($config);
@@ -46,34 +46,33 @@ $config = new XmlConfig('
 	</form>
 ', true);
 
-echo "<pre>";
+echo '<pre>';
 
 /**
  * Validate
  */
 
 if (array_key_exists('submit-btn', $_POST)) {
-	$validator = new Validation($config);
+    $validator = new Validation($config);
 
-	$validator->addListener('username', 'The username is invalid', function($value){
-		return $value == 'Davide';
-	});
+    $validator->addListener('username', 'The username is invalid', function ($value) {
+        return $value == 'Davide';
+    });
 
-	$validator->addListener('username', 'The username is too long', function($value){
-		return strlen('Davide') < 7;
-	});
+    $validator->addListener('username', 'The username is too long', function ($value) {
+        return strlen('Davide') < 7;
+    });
 
-	$validator->addData($_POST);
-	$validator->addData($_FILES);
+    $validator->addData($_POST);
+    $validator->addData($_FILES);
 
-	$result = $validator->validate();
+    $result = $validator->validate();
 
-	if ($result->isValid()) {
-		echo "OK!";
-	}
-	else {
-		print_r($result->getErrors());
-	}
+    if ($result->isValid()) {
+        echo 'OK!';
+    } else {
+        print_r($result->getErrors());
+    }
 }
 
 /**
@@ -84,10 +83,10 @@ $renderer = new Renderer($config);
 $buffer = $renderer->render();
 
 $buffer->group(['username', 'password']);
-$buffer->each(function($chunk, $content){
-	$chunk->wrap(
-		'<div class="input-wrapper" style="padding: 10px; border: 1px solid lightgray; margin-bottom: 10px">' . $content . '</div>'
-	);
+$buffer->each(function ($chunk, $content) {
+    $chunk->wrap(
+        '<div class="input-wrapper" style="padding: 10px; border: 1px solid lightgray; margin-bottom: 10px">' . $content . '</div>'
+    );
 });
 
 $buffer->submitBtn->wrap('<hr>%s');

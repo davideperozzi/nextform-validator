@@ -13,7 +13,8 @@ class DateformatValidator extends AbstractValidator implements ConnectValidation
      * @param string $value
      * @return boolean
      */
-    public function validate($value) {
+    public function validate($value)
+    {
         if ( ! empty($this->option)) {
             $date = \DateTime::createFromFormat($this->option, $value);
 

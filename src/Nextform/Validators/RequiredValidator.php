@@ -2,175 +2,169 @@
 
 namespace Nextform\Validators;
 
-use Nextform\Validation\Models\FileModel;
 use Nextform\Fields\CollectionField;
 use Nextform\Helpers\ArrayHelper;
+use Nextform\Validation\Models\FileModel;
 
 class RequiredValidator extends AbstractValidator implements ConnectValidation, CollectionValidation
 {
-	/**
-	 * @var string
-	 */
-	public static $optionType = self::OPTION_TYPE_BOOLEAN;
+    /**
+     * @var string
+     */
+    public static $optionType = self::OPTION_TYPE_BOOLEAN;
 
-	/**
-	 * @var boolean
-	 */
-	public static $validateUndefinedValues = true;
+    /**
+     * @var boolean
+     */
+    public static $validateUndefinedValues = true;
 
-	/**
-	 * @var array
-	 */
-	public static $supportedModifiers = [
-		'min' => 'integer',
-		'max' => 'integer'
-	];
+    /**
+     * @var array
+     */
+    public static $supportedModifiers = [
+        'min' => 'integer',
+        'max' => 'integer'
+    ];
 
-	/**
-	 * @var array
-	 */
-	public static $supportedTypes = [
-		'array<Nextform\Validation\Models\FileModel>',
-		'array',
-		'string',
-		'integer'
-	];
+    /**
+     * @var array
+     */
+    public static $supportedTypes = [
+        'array<Nextform\Validation\Models\FileModel>',
+        'array',
+        'string',
+        'integer'
+    ];
 
-	/**
-	 * @param string|array $value
-	 * @return boolean
-	 */
-	public function validate($value) {
-		if (true == $this->option) {
-			if ($this->field instanceof CollectionField) {
-				if (is_array($value) && ! empty($value)) {
-					$reducedValues = ArrayHelper::serializeArrayKeys($value);
-					$pathPrefix = $this->field->getAttribute('name');
-					$validateValues = [];
+    /**
+     * @param string|array $value
+     * @return boolean
+     */
+    public function validate($value)
+    {
+        if (true == $this->option) {
+            if ($this->field instanceof CollectionField) {
+                if (is_array($value) && ! empty($value)) {
+                    $reducedValues = ArrayHelper::serializeArrayKeys($value);
+                    $pathPrefix = $this->field->getAttribute('name');
+                    $validateValues = [];
 
-					foreach ($reducedValues as $path => $value) {
-						if (array_key_exists($path, $validateValues)) {
-							continue;
-						}
+                    foreach ($reducedValues as $path => $value) {
+                        if (array_key_exists($path, $validateValues)) {
+                            continue;
+                        }
 
-						foreach ($this->field->getChildren() as $child) {
-							$childName = $child->getAttribute('name');
-							$collectionPath = $pathPrefix . $path;
+                        foreach ($this->field->getChildren() as $child) {
+                            $childName = $child->getAttribute('name');
+                            $collectionPath = $pathPrefix . $path;
 
-							if ($childName == $collectionPath) {
-								$validateValues[$path] = $value;
-							}
-						}
-					}
+                            if ($childName == $collectionPath) {
+                                $validateValues[$path] = $value;
+                            }
+                        }
+                    }
 
-					if (empty($validateValues)) {
-						return false;
-					}
-					else {
-						$validValues = [];
+                    if (empty($validateValues)) {
+                        return false;
+                    }
 
-						foreach ($validateValues as $path => $values) {
-							if (is_array($values)) {
-								foreach ($values as $value) {
-									$validValues[] = $this->isEmpty($value) ? 0 : 1;
-								}
-							}
-							else {
-								$validValues[] = $this->isEmpty($values) ? 0 : 1;
-							}
-						}
+                    $validValues = [];
 
-						$valueResultsCount = array_count_values($validValues);
+                    foreach ($validateValues as $path => $values) {
+                        if (is_array($values)) {
+                            foreach ($values as $value) {
+                                $validValues[] = $this->isEmpty($value) ? 0 : 1;
+                            }
+                        } else {
+                            $validValues[] = $this->isEmpty($values) ? 0 : 1;
+                        }
+                    }
 
-						// Validate min modifier
-						if (array_key_exists('min', $this->modifiers)) {
-							if ($valueResultsCount[1] < $this->modifiers['min']) {
-								return false;
-							}
-						}
+                    $valueResultsCount = array_count_values($validValues);
 
-						// Validate max modifier
-						if (array_key_exists('max', $this->modifiers)) {
-							if ($valueResultsCount[1] > $this->modifiers['max']) {
-								return false;
-							}
-						}
-					}
+                    // Validate min modifier
+                    if (array_key_exists('min', $this->modifiers)) {
+                        if ($valueResultsCount[1] < $this->modifiers['min']) {
+                            return false;
+                        }
+                    }
 
-					return true;
-				}
-			}
-			else {
-				if (is_array($value) && ! empty($value)) {
-					if ($this->isArrayField()) {
-						$reducedValues = ArrayHelper::serializeArrayKeys($value);
-						$fieldPath = $this->field->getAttribute('name');
-						$pathPrefix = ArrayHelper::getSerializedArrayEntry($fieldPath);
-						foreach ($reducedValues as $path => $values) {
-							if ($pathPrefix . $path == $fieldPath) {
-								if (is_array($values)) {
-									$validValues = [];
+                    // Validate max modifier
+                    if (array_key_exists('max', $this->modifiers)) {
+                        if ($valueResultsCount[1] > $this->modifiers['max']) {
+                            return false;
+                        }
+                    }
 
-									foreach ($values as $value) {
-										if ($value instanceof FileModel) {
-											$validValues[] = $value->isValid() ? 1 : 0;
-										}
-										else {
-											$validValues[] =  $this->isEmpty($value) ? 0 : 1;
-										}
-									}
 
-									$valueResultsCount = array_count_values($validValues);
+                    return true;
+                }
+            } else {
+                if (is_array($value) && ! empty($value)) {
+                    if ($this->isArrayField()) {
+                        $reducedValues = ArrayHelper::serializeArrayKeys($value);
+                        $fieldPath = $this->field->getAttribute('name');
+                        $pathPrefix = ArrayHelper::getSerializedArrayEntry($fieldPath);
+                        foreach ($reducedValues as $path => $values) {
+                            if ($pathPrefix . $path == $fieldPath) {
+                                if (is_array($values)) {
+                                    $validValues = [];
 
-									return array_key_exists(1, $valueResultsCount);
-								}
-								else {
-									return ! $this->isEmpty($values);
-								}
-							}
-						}
-					}
-					else {
-						if ( ! empty ($value)) {
-							$valueCount = count($value);
-							$validCount = 0;
+                                    foreach ($values as $value) {
+                                        if ($value instanceof FileModel) {
+                                            $validValues[] = $value->isValid() ? 1 : 0;
+                                        } else {
+                                            $validValues[] =  $this->isEmpty($value) ? 0 : 1;
+                                        }
+                                    }
 
-							foreach ($value as $val) {
-								if ($val instanceof FileModel) {
-									if ($val->isValid()) {
-										$validCount++;
-									}
-								}
-								else if (is_string($val) && ! $this->isEmpty($val)) {
-									$validCount++;
-								}
-								else if ( ! empty($val)) {
-									$validCount++;
-								}
-							}
+                                    $valueResultsCount = array_count_values($validValues);
 
-							return $validCount > 0;
-						}
+                                    return array_key_exists(1, $valueResultsCount);
+                                }
 
-						return ! empty($value);
-					}
-				}
-				else if (is_string($value) || is_numeric($value)) {
-					return !$this->isEmpty($value);
-				}
-			}
+                                return ! $this->isEmpty($values);
+                            }
+                        }
+                    } else {
+                        if ( ! empty($value)) {
+                            $valueCount = count($value);
+                            $validCount = 0;
 
-			return false;
-		}
+                            foreach ($value as $val) {
+                                if ($val instanceof FileModel) {
+                                    if ($val->isValid()) {
+                                        $validCount++;
+                                    }
+                                } elseif (is_string($val) && ! $this->isEmpty($val)) {
+                                    $validCount++;
+                                } elseif ( ! empty($val)) {
+                                    $validCount++;
+                                }
+                            }
 
-		return true;
-	}
+                            return $validCount > 0;
+                        }
 
-	/**
-	 * @param string $str
-	 * @return boolean
-	 */
-	private function isEmpty($str) {
-		return trim(preg_replace('/ |\t|\r|\r\n/', '', $str)) == '';
-	}
+                        return ! empty($value);
+                    }
+                } elseif (is_string($value) || is_numeric($value)) {
+                    return ! $this->isEmpty($value);
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $str
+     * @return boolean
+     */
+    private function isEmpty($str)
+    {
+        return trim(preg_replace('/ |\t|\r|\r\n/', '', $str)) == '';
+    }
 }

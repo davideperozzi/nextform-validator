@@ -36,7 +36,8 @@ class FileModel
      * @param integer $error
      * @param integer $size
      */
-    public function __construct($name, $type, $tmpName, $error, $size) {
+    public function __construct($name, $type, $tmpName, $error, $size)
+    {
         $this->name = $name;
         $this->type = $type;
         $this->tmpName = $tmpName;
@@ -47,7 +48,8 @@ class FileModel
     /**
      * @return boolean
      */
-    public function isValid() {
+    public function isValid()
+    {
         return ! empty($this->name) && $this->error == 0;
     }
 }
