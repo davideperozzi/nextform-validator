@@ -98,6 +98,8 @@ class RequiredValidator extends AbstractValidator implements ConnectValidation, 
 
 
                     return true;
+                } elseif (is_string($value)) {
+                    return ! $this->isEmpty($value);
                 }
             } else {
                 if (is_array($value) && ! empty($value)) {
