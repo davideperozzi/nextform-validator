@@ -15,7 +15,6 @@
             "Nextform\\Validators\\": "src/Nextform/Validators"
         }
     },
-    "minimum-stability": "beta",
     "require-dev": {
         "phpunit/phpunit": "~5.1",
         "friendsofphp/php-cs-fixer": "^2.4",
