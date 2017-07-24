@@ -20,16 +20,20 @@
         "phpunit/phpunit": "~5.1",
         "friendsofphp/php-cs-fixer": "^2.4",
         "brainmaestro/composer-git-hooks": "^2.2",
-        "davideperozzi/nextform-renderer": "dev-dev"
+        "davideperozzi/nextform-renderer": "^1.0"
     },
     "require": {
-        "davideperozzi/nextform-config": "dev-dev",
-        "davideperozzi/nextform-helpers": "dev-dev"
+        "davideperozzi/nextform-config": "^1.0",
+        "davideperozzi/nextform-helpers": "^1.0"
     },
     "extra": {
         "hooks": {
             "pre-commit": "php ./vendor/bin/php-cs-fixer fix --verbose",
             "post-commit": "php ./vendor/bin/phpunit"
         }
+    },
+    "scripts": {
+        "post-install-cmd": "php ./vendor/bin/cghooks add --ignore-lock",
+        "post-update-cmd": "php ./vendor/bin/cghooks update"
     }
 }
