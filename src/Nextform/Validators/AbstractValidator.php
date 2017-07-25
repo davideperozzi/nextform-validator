@@ -141,12 +141,16 @@ abstract class AbstractValidator
             $typeCount = [];
 
             foreach ($value as $val) {
-                $class = get_class($val);
+                if ( ! is_object($val)) {
+                    continue;
+                }
 
-                if (array_key_exists($class, $typeCount)) {
-                    $typeCount[$class]++;
+                $className = get_class($val);
+
+                if (array_key_exists($className, $typeCount)) {
+                    $typeCount[$className]++;
                 } else {
-                    $typeCount[$class] = 1;
+                    $typeCount[$className] = 1;
                 }
             }
 

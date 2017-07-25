@@ -197,7 +197,6 @@ class ValidationTest extends TestCase
         $this->assertFalse($validator->validate([$file3]));
     }
 
-
     public function testConnectValidation()
     {
         $config = new XmlConfig(
@@ -236,7 +235,6 @@ class ValidationTest extends TestCase
         ])->isValid());
     }
 
-
     public function testListenerValidation()
     {
         $config = new XmlConfig(
@@ -266,5 +264,27 @@ class ValidationTest extends TestCase
             'password' => '12345678',
             'password-validate' => '12345678'
         ])->isValid());
+    }
+
+    /**
+     * @expectedException Nextform\Validation\Exception\TypeNotSupportedException
+     * @expectedExceptionMessage Value type "string" not supported for validator "filetype"
+     */
+    public function testInvalidFileInputValidation() {
+         $config = new XmlConfig(
+            '<form>
+                <input name="testfile" type="file">
+                    <validation required="true" filetype="jpg,jpeg,png">
+                        <errors>
+                            <required>1</required>
+                        </errors>
+                    </validation>
+                </input>
+            </form>',
+            true
+        );
+
+        $validation = new Validation($config);
+        $validation->validate(['testfile' => '']);
     }
 }
