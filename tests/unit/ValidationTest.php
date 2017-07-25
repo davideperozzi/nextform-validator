@@ -270,8 +270,9 @@ class ValidationTest extends TestCase
      * @expectedException Nextform\Validation\Exception\TypeNotSupportedException
      * @expectedExceptionMessage Value type "string" not supported for validator "filetype"
      */
-    public function testInvalidFileInputValidation() {
-         $config = new XmlConfig(
+    public function testInvalidFileInputValidation()
+    {
+        $config = new XmlConfig(
             '<form>
                 <input name="testfile" type="file">
                     <validation required="true" filetype="jpg,jpeg,png">
