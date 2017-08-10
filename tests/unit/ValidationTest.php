@@ -328,4 +328,28 @@ class ValidationTest extends TestCase
         $this->assertFalse($validation->validate(['firstname' => '1'])->isValid());
         $this->assertTrue($validation->validate(['firstname' => '1', 'testfile' => $file])->isValid());
     }
+
+    public function testGetValidationFields()
+    {
+        $config = new XmlConfig(
+            '<form>
+                <input name="firstname" type="text">
+                    <validation required="true" />
+                </input>
+                <input name="testfile" type="file">
+                    <validation required="true" filetype="jpg,jpeg,png">
+                        <errors>
+                            <required>1</required>
+                        </errors>
+                    </validation>
+                </input>
+            </form>',
+            true
+        );
+
+        $validation = new Validation($config);
+        $fields = $validation->getFieldsByValidator(\Nextform\Validators\RequiredValidator::class);
+
+        $this->assertEquals(count($fields), 2);
+    }
 }

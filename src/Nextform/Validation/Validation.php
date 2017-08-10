@@ -191,6 +191,29 @@ class Validation
     }
 
     /**
+     * @param string
+     * @return array
+     */
+    public function getFieldsByValidator($class)
+    {
+        $fields = [];
+
+        foreach ($this->models as $id => $models) {
+            if (in_array($id, $this->ignore)) {
+                continue;
+            }
+
+            foreach ($models as $model) {
+                if ($model->validator instanceof $class) {
+                    $fields[] = $model->validator->getField();
+                }
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * @param integer $type
      */
     public function setType($type)

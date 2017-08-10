@@ -81,6 +81,14 @@ abstract class AbstractValidator
     }
 
     /**
+     * @return AbstractField
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
      * @param string $option
      */
     public function setOption($option)
