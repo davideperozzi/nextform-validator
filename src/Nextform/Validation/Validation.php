@@ -215,13 +215,12 @@ class Validation
                     $field->getAttribute('type') == 'file') {
                     $ignore[] = $field->id;
                 }
-            } else if ($this->type == self::TYPE_ONLY_FILE_VALIDATION) {
+            } elseif ($this->type == self::TYPE_ONLY_FILE_VALIDATION) {
                 if ($field->hasAttribute('type')) {
                     if ($field->getAttribute('type') != 'file') {
                         $ignore[] = $field->id;
                     }
-                }
-                else {
+                } else {
                     $ignore[] = $field->id;
                 }
             }
