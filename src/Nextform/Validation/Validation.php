@@ -191,15 +191,16 @@ class Validation
     }
 
     /**
-     * @param string
+     * @param string $class
+     * @param boolean $includeIgnored
      * @return array
      */
-    public function getFieldsByValidator($class)
+    public function getFieldsByValidator($class, $includeIgnored = false)
     {
         $fields = [];
 
         foreach ($this->models as $id => $models) {
-            if (in_array($id, $this->ignore)) {
+            if (false == $includeIgnored && in_array($id, $this->ignore)) {
                 continue;
             }
 
