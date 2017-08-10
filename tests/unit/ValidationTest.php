@@ -288,4 +288,44 @@ class ValidationTest extends TestCase
         $validation = new Validation($config);
         $validation->validate(['testfile' => '']);
     }
+
+    public function testValidationTypes()
+    {
+        $config = new XmlConfig(
+            '<form>
+                <input name="firstname" type="text">
+                    <validation required="true" />
+                </input>
+                <input name="testfile" type="file">
+                    <validation required="true" filetype="jpg,jpeg,png">
+                        <errors>
+                            <required>1</required>
+                        </errors>
+                    </validation>
+                </input>
+            </form>',
+            true
+        );
+
+        $file = [
+            'name' => 'file1.jpg',
+            'type' => 'image/jpg',
+            'tmp_name' => '/private/path',
+            'error' => 0,
+            'size' => 40000
+        ];
+
+        $validation = new Validation($config, Validation::TYPE_EXCLUDE_FILE_VALIDATION);
+        $this->assertTrue($validation->validate(['testfile' => '', 'firstname' => '1'])->isValid());
+        $this->assertFalse($validation->validate(['testfile' => ''])->isValid());
+
+        $validation->setType(Validation::TYPE_ONLY_FILE_VALIDATION);
+        $this->assertTrue($validation->validate(['testfile' => $file])->isValid());
+        $this->assertFalse($validation->validate(['firstname' => '1'])->isValid());
+
+        $validation->setType(Validation::TYPE_DEFAULT);
+        $this->assertFalse($validation->validate(['testfile' => $file])->isValid());
+        $this->assertFalse($validation->validate(['firstname' => '1'])->isValid());
+        $this->assertTrue($validation->validate(['firstname' => '1', 'testfile' => $file])->isValid());
+    }
 }

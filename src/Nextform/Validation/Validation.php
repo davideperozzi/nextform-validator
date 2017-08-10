@@ -19,6 +19,21 @@ class Validation
     const VALUE_UNDEFINED = '129debbe81b69843f54ac33c1872b8af';
 
     /**
+     * @var integer
+     */
+    const TYPE_DEFAULT = 0;
+
+    /**
+     * @var integer
+     */
+    const TYPE_EXCLUDE_FILE_VALIDATION = 1;
+
+    /**
+     * @var integer
+     */
+    const TYPE_ONLY_FILE_VALIDATION = 2;
+
+    /**
      * @var ValidatorFactory
      */
     private $validatorFactory = null;
@@ -39,12 +54,40 @@ class Validation
     private $tmpData = [];
 
     /**
-     * @param AbstractConfig $config
+     * @var integer
      */
-    public function __construct(AbstractConfig $config)
+    private $type = self::TYPE_DEFAULT;
+
+    /**
+     * @var AbstractConfig
+     */
+    private $config = null;
+
+    /**
+     * @var array
+     */
+    private $ignore = [];
+
+    /**
+     * @param AbstractConfig $config
+     * @param integer $type
+     */
+    public function __construct(AbstractConfig $config, $type = self::TYPE_DEFAULT)
     {
+        $this->type = $type;
+        $this->config = $config;
         $this->validatorFactory = new ValidatorFactory();
-        $this->parseConfig($config);
+
+        $this->parseConfig($this->config);
+        $this->setType($type);
+    }
+
+    /**
+     * @return AbstractConfig
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     /**
@@ -141,8 +184,58 @@ class Validation
     {
         $fields = $config->getFields();
 
+        // Create all models
         foreach ($fields as $field) {
             $this->createModels($field);
+        }
+    }
+
+    /**
+     * @param integer $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+        $this->ignore = [];
+        $fields = $this->config->getFields();
+
+        $this->filterModels($fields);
+    }
+
+    /**
+     * @param array &$fields
+     */
+    private function filterModels(&$fields)
+    {
+        $ignore = [];
+
+        foreach ($fields as $field) {
+            if ($this->type == self::TYPE_EXCLUDE_FILE_VALIDATION) {
+                if ($field->hasAttribute('type') &&
+                    $field->getAttribute('type') == 'file') {
+                    $ignore[] = $field->id;
+                }
+            } else if ($this->type == self::TYPE_ONLY_FILE_VALIDATION) {
+                if ($field->hasAttribute('type')) {
+                    if ($field->getAttribute('type') != 'file') {
+                        $ignore[] = $field->id;
+                    }
+                }
+                else {
+                    $ignore[] = $field->id;
+                }
+            }
+
+            if ($field->hasChildren()) {
+                $children = $field->getChildren();
+                $this->filterModels($children);
+            }
+        }
+
+        foreach ($ignore as $id) {
+            if (array_key_exists($id, $this->models)) {
+                $this->ignore[] = $id;
+            }
         }
     }
 
@@ -212,6 +305,10 @@ class Validation
         $input = array_merge($this->tmpData, $this->parseInput($input));
 
         foreach ($this->models as $id => $validators) {
+            if (in_array($id, $this->ignore)) {
+                continue;
+            }
+
             if (preg_match('/^(.*)\[.*\]$/', $id, $matches)) {
                 $inputEntry = ArrayHelper::getSerializedArrayEntry($id);
                 $value = array_key_exists($inputEntry, $input) ? $input[$inputEntry] : self::VALUE_UNDEFINED;
@@ -278,6 +375,10 @@ class Validation
         }
 
         foreach ($this->listeners as $id => $fieldListeners) {
+            if (in_array($id, $this->ignore)) {
+                continue;
+            }
+
             foreach ($fieldListeners as $listener) {
                 if (array_key_exists($id, $input)) {
                     if ( ! $listener->call($input[$id])) {
