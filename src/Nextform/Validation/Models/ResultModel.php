@@ -3,7 +3,8 @@
 namespace Nextform\Validation\Models;
 
 use Nextform\Fields\Validation\ErrorModel;
-use Nextform\Fields\Validation\ValidationModel as ConfigModel;
+use Nextform\Fields\Validation\ValidationModel as ValidationConfigModel;
+use Nextform\Validation\Exception\InvalidErrorModelException;
 
 class ResultModel implements \JsonSerializable
 {
@@ -29,20 +30,24 @@ class ResultModel implements \JsonSerializable
 
     /**
      * @param string $id
-     * @param string|ConfigModel $model
+     * @param string|ValidationConfigModel $modelOrMessage
      */
-    public function addError($id, $model)
+    public function addError(string $id, $modelOrMessage)
     {
         if (true == $this->valid) {
             $this->valid = false;
         }
 
-        if (is_string($model)) {
+        // Create a model if message is given
+        if (is_string($modelOrMessage)) {
             static::$customCounter++;
 
-            $error = $model;
-            $model = new ConfigModel(self::CUSTOM_PREFIX . static::$customCounter);
-            $model->error = new ErrorModel($error);
+            $model = new ValidationConfigModel(self::CUSTOM_PREFIX . static::$customCounter);
+            $model->error = new ErrorModel($modelOrMessage);
+        } elseif ($modelOrMessage instanceof ValidationConfigModel) {
+            $model = $modelOrMessage;
+        } else {
+            throw new InvalidErrorModelException('Invalid validation model given');
         }
 
         if ( ! array_key_exists($id, $this->errors)) {

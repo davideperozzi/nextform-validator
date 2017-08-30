@@ -127,6 +127,7 @@ class Validation
         foreach ($input as $name => $value) {
             if (FileHelper::isUploadedFile($value)) {
                 $files = $this->createFileModels($value);
+
                 if ( ! empty($files)) {
                     $parsedInput[$name] = $files;
                 }
