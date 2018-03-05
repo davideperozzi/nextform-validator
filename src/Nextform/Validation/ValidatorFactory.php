@@ -15,6 +15,8 @@ use Nextform\Validators\MinsizeValidator;
 use Nextform\Validators\RegexValidator;
 use Nextform\Validators\RequiredValidator;
 use Nextform\Validators\ZipcodeValidator;
+use Nextform\Validators\MaxcountValidator;
+use Nextform\Validators\MincountValidator;
 
 class ValidatorFactory
 {
@@ -26,6 +28,8 @@ class ValidatorFactory
         'datecheck' => DatecheckValidator::class,
         'maxlength' => MaxlengthValidator::class,
         'minlength' => MinlengthValidator::class,
+        'maxcount' => MaxcountValidator::class,
+        'mincount' => MincountValidator::class,
         'filetype' => FiletypeValidator::class,
         'required' => RequiredValidator::class,
         'maxsize' => MaxsizeValidator::class,
